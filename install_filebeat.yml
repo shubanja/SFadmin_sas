@@ -1,0 +1,33 @@
+---
+
+- hosts: filebeat_users
+  become: true
+  remote_user: ansible-admin
+  tasks:
+
+  - name: 'copying .deb file'
+    ansible.builtin.template:
+      src: "~/SFadmin_final/files/deb/filebeat-7.17.8-amd64.deb"
+      dest: "/tmp/filebeat-7.17.8-amd64.deb"
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: 'installing filebeat'
+    ansible.builtin.apt:
+      deb: "/tmp/filebeat-7.17.8-amd64.deb"
+ 
+  - name: 'copying .conf files'
+    ansible.builtin.template:
+      src: "~/SFadmin_final/files/filebeat/filebeat.yml"
+      dest: "/etc/filebeat/filebeat.yml"
+      force: true
+      owner: root
+      group: root
+      mode: 0644
+ 
+  - name: 'starting filebeat.service'
+    ansible.builtin.systemd:
+      name: filebeat
+      state: started
+      enabled: true

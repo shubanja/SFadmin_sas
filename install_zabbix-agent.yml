@@ -1,0 +1,27 @@
+---
+
+- hosts: zabbix_users
+  become: true
+  remote_user: ansible-admin
+  tasks:
+
+  - name: 'installing zabbix-agent'
+    ansible.builtin.apt:
+      update_cache: true
+      name: zabbix-agent
+      state: latest
+ 
+  - name: 'copying .conf files'
+    ansible.builtin.template:
+      src: "~/SFadmin_final/files/zabbix/zabbix_agentd.conf"
+      dest: "/etc/zabbix/zabbix_agentd.conf"
+      force: true
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: 'starting zabbix-agent.service'
+    ansible.builtin.systemd:
+      name: zabbix-agent
+      state: started
+      enabled: true

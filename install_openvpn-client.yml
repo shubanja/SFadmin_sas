@@ -1,0 +1,49 @@
+---
+
+- hosts: vpn_users
+  become: true
+  remote_user: ansible-admin
+  pre_tasks:
+
+  - name: 'installing openvpn'
+    ansible.builtin.apt:
+      update_cache: true
+      name: openvpn
+      state: latest
+
+  - name: 'copying .conf(.ovpn) files'
+    ansible.builtin.copy:
+      src: "~/SFadmin_final/files/vpn/{{ ovpn_filename }}.conf"
+      dest: "/etc/openvpn/{{ ovpn_filename }}.conf"
+      owner: shubin
+      group: shubin
+      mode: '0644'
+
+  - name: 'uncomenting AUTOSTART parameter'
+    ansible.builtin.replace:
+      path: /etc/default/openvpn
+      regexp: '^#AUTOSTART="all"'
+      replace: 'AUTOSTART="all"'
+
+  - name: 'starting openvpn.service'
+    ansible.builtin.systemd:
+      name: "openvpn@{{ ovpn_filename }}"
+      state: started
+      enabled: true
+      daemon_reload: true
+  
+- hosts: dns_users
+  become: true
+  remote_user: ansible-admin
+  tasks:
+
+  - name: "setting up systemd-resolve"
+    ansible.builtin.replace:
+      path: /etc/systemd/resolved.conf
+      regexp: '^#DNS='
+      replace: 'DNS=10.0.0.2'
+
+  - name: "restarting systemd-resolve"
+    ansible.builtin.systemd:
+      name: systemd-resolved
+      state: restarted
