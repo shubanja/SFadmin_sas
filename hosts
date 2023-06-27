@@ -1,0 +1,4 @@
+[servers]
+zb6.my ansible_ssh_host=127.0.0.1
+nginx.my ansible_ssh_host=10.0.0.2
+elk.my ansible_ssh_host=10.0.0.3
